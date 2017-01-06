@@ -26,6 +26,7 @@ object StreamWithActors extends App {
     }
   }
 
+  // Creates a `Source` that is materialized as an [[akka.actor.ActorRef]]
   val s = Source
     .actorRef[Int](bufferSize = 0, overflowStrategy = OverflowStrategy.fail)
     .mapMaterializedValue(run)
