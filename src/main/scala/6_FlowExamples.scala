@@ -1,13 +1,13 @@
 import akka.actor.Actor.Receive
 import akka.{Done, NotUsed}
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import akka.stream.scaladsl.{RunnableGraph, Sink, Source}
+import akka.stream.scaladsl.{Flow, RunnableGraph, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object SinkActor extends App {
+object FlowExamples extends App {
 
   implicit val system = ActorSystem("Test1")
   implicit val materializer = ActorMaterializer()
@@ -19,9 +19,12 @@ object SinkActor extends App {
   }))
 
   val source = Source(1 to 3)
-  // Sends the elements of the stream to the given `ActorRef`.
-  val sink = Sink.actorRef[Int](actor, onCompleteMessage = "stream compleated")
-  val runnable: RunnableGraph[NotUsed] = source to sink
+  val sink = Sink foreach println
+
+  val invert: Flow[Int, Int, NotUsed] = Flow[Int].map(_ * -1)
+  val doubler: Flow[Int, Double, NotUsed] = Flow[Int].map(_ * 0.2)
+
+  val runnable = source via invert via doubler to sink
 
   runnable.run()
 }
